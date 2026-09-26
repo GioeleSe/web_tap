@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Camera Stream</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div>
+        <canvas id="videoCanvas" width="640" height="480"></canvas>
+    </div>
+
+    <div class="controls">
+        <button onclick="fetch('/gpio/led/toggle/blue')">Toggle Blue</button>
+        <button onclick="fetch('/gpio/led/toggle/white')">Toggle White</button>
+        <button onclick="fetch('/gpio/motor/start/cw')">Motor - Start</button>
+        <button onclick="fetch('/gpio/motor/toggle')">Motor - Change direction</button>
+        <button onclick="fetch('/gpio/motor/stop')">Motor - Stop</button>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>
