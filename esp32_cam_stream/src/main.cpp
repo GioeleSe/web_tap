@@ -17,8 +17,11 @@ const int D2 = 15;
 const int D3 = 4;
 const int D4 = 16;
 const int D5 = 17;
-const int D6 = 26;
+const int D6 = 18;
 const int D7 = 19;
+
+// --- LIGHT CONTROL PINS ---
+const int LIGHT_PIN = 26;
 
 // --- RASPBERRY PI AP CREDENTIALS ---
 const char *ssid = "esp_cam_ap";
@@ -98,7 +101,7 @@ void cameraThreadFunction(void *pvParameters) {
       readyFrameSize = FRAME_SIZE;
       captureHealthy = true;
       xSemaphoreGive(frameMutex);
-      vTaskDelay(1); // Brief pause for wdt
+      vTaskDelay(pdMS_TO_TICKS(0.1)); // Brief pause for wdt
     }
 
     usingBufA = !usingBufA;
@@ -150,6 +153,8 @@ void handleCapture(AsyncWebServerRequest *request) {
 }
 
 void setup() {
+  pinMode(LIGHT_PIN, OUTPUT);
+
   Serial.begin(115200);
   delay(500);
 
@@ -175,6 +180,23 @@ void setup() {
   frameMutex = xSemaphoreCreateMutex();
 
   server.on("/capture", HTTP_GET, handleCapture);
+  
+  server.on("/light/on", HTTP_GET, [](AsyncWebServerRequest *request){
+    digitalWrite(LIGHT_PIN, HIGH);
+    request->send(200, "text/plain", "Light ON");
+  });
+  
+  server.on("/light/off", HTTP_GET, [](AsyncWebServerRequest *request){
+    digitalWrite(LIGHT_PIN, LOW);
+    request->send(200, "text/plain", "Light OFF");
+  });
+
+  server.on("/reboot", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/plain", "Rebooting ESP32...");
+    delay(100);
+    ESP.restart();
+  });
+
   server.begin();
 
   // Spawn camera thread on Core 1
